@@ -10,5 +10,5 @@ git clone git@github.com:hugojunior/uni7-regressao-linear.git && cd uni7-regress
 ```
 
 ## Bibliotecas:
-- ChartJS
-- Bootstrap 5
+- [ChartJS](https://www.chartjs.org/)
+- [Bootstrap 5](https://getbootstrap.com/)
