@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inteligência Artificial - Regressão Linear</title>
+  <title>Inteligência Artificial - Regressão Linear Gradiente Descendente</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -20,71 +20,85 @@
       margin: 20px auto;
       height: 400px;
     }
+    .zoom-tools {
+      position: absolute;
+      top: -10px;
+      right: 18px;
+    }
+    #logs {
+      font-size: 10px;
+      background-color: #dedede;
+      padding: 10px;
+      max-height: 300px;
+    }
   </style>
 </head>
 
 <body>
   <main class="flex-shrink-0">
     <div class="container">
-      <h1 class="text-center mt-5 mb-3">Regressão Linear</h1>
+      <h1 class="text-center mt-5 mb-3">Regressão Linear - GD</h1>
       <p class="text-center">Projeto da disciplina de <strong>Inteligência Artificial</strong> do curso de Sistemas de
         Informação na <strong>UNI7</strong>.</p>
       <hr>
       <div class="chart-container">
+        <div class="controls zoom-tools">
+          <div class="btn-group" role="group" aria-label="Basic example">
+            <button class="btn btn-secondary btn-sm" onclick="zoomIn()">-</button>
+            <button class="btn btn-secondary btn-sm" onclick="zoomOut()">+</button>
+          </div>
+        </div>
         <canvas id="regLinear"></canvas>
       </div>
       <div class="controls my-4">
-        <h3 class="my-4">
-          <div class="controls float-end">
-            <div class="btn-group" role="group" aria-label="Basic example">
-              <button class="btn btn-secondary btn-sm" onclick="zoomIn()">-</button>
-              <button class="btn btn-secondary btn -sm" onclick="zoomOut()">+</button>
-            </div>
-          </div>
-        </h3>
+
         <div class="row">
           <div class="col-12 col-sm-4 col-md-3">
             <h3 class="my-4">Treinamento</h3>
             <div id="input-container" class="mb-3">
               <div class="input-group din mb-2">
-                <input type="number" class="form-control input-x" placeholder="X" value="1">
-                <input type="number" class="form-control input-y" placeholder="Y" value="3">
+                <input type="number" class="form-control input-x" placeholder="X" value="1980">
+                <input type="number" class="form-control input-y" placeholder="Y" value="2.1">
                 <button class="btn btn-danger" onclick="removeInput(this)">x</button>
               </div>
               <div class="input-group din mb-2">
-                <input type="number" class="form-control input-x" placeholder="X" value="2">
-                <input type="number" class="form-control input-y" placeholder="Y" value="7">
+                <input type="number" class="form-control input-x" placeholder="X" value="1985">
+                <input type="number" class="form-control input-y" placeholder="Y" value="2.9">
                 <button class="btn btn-danger" onclick="removeInput(this)">x</button>
               </div>
               <div class="input-group din mb-2">
-                <input type="number" class="form-control input-x" placeholder="X" value="3">
-                <input type="number" class="form-control input-y" placeholder="Y" value="5">
+                <input type="number" class="form-control input-x" placeholder="X" value="1990">
+                <input type="number" class="form-control input-y" placeholder="Y" value="3.2">
                 <button class="btn btn-danger" onclick="removeInput(this)">x</button>
               </div>
               <div class="input-group din mb-2">
-                <input type="number" class="form-control input-x" placeholder="X" value="4">
-                <input type="number" class="form-control input-y" placeholder="Y" value="11">
+                <input type="number" class="form-control input-x" placeholder="X" value="1995">
+                <input type="number" class="form-control input-y" placeholder="Y" value="4.1">
                 <button class="btn btn-danger" onclick="removeInput(this)">x</button>
               </div>
               <div class="input-group din mb-2">
-                <input type="number" class="form-control input-x" placeholder="X" value="5">
-                <input type="number" class="form-control input-y" placeholder="Y" value="14">
+                <input type="number" class="form-control input-x" placeholder="X" value="2000">
+                <input type="number" class="form-control input-y" placeholder="Y" value="4.9">
                 <button class="btn btn-danger" onclick="removeInput(this)">x</button>
               </div>
             </div>
             <button class="btn btn-light" onclick="addInput()">Novo</button>
             <button class="btn btn-primary" onclick="updateChart()">Atualizar</button>
           </div>
-          <div class="col-12 col-sm-8 col-md-9">
-            <h3 class="my-4">Previsão</h3>
-            <p>Defina um valor de X para gerar a previsão de Y baseado no modelo de treinamento.</p>
-            <div id="input-container" class="mb-3 col-12 col-md-4 col-lg-3">
+          <div class="col-12 col-sm-8 col-md-9 col-lg-3">
+            <h3 class="my-4">Predição</h3>
+            <p>Defina um valor de X para gerar Y.</p>
+            <div id="input-container" class="mb-3 col-12">
               <div class="input-group mb-2">
                 <input type="number" class="form-control" placeholder="X" id="predict-x">
-                <button class="btn btn-primary" onclick="predictValue()">Prever</button>
+                <button class="btn btn-primary" onclick="predictValue()">Gerar</button>
               </div>
             </div>
             <div id="previsao"></div>
+          </div>
+          <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+            <h3 class="my-4">Logs</h3>
+            <pre id="logs" class="text-muted"></pre>
           </div>
         </div>
         <hr>
@@ -93,7 +107,7 @@
     </div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="app.js"></script>
+  <script src="app-gd.js"></script>
 </body>
 
 </html>

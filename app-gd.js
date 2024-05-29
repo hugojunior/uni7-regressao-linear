@@ -1,25 +1,61 @@
-let X = [1, 2, 3, 4, 5];
-let Y = [3, 7, 5, 11, 14];
+let X = [1980, 1985, 1990, 1995, 2000];
+let Y = [2.1, 2.9, 3.2, 4.1, 4.9];
+let b0, b1;
 
 function mean(array) {
   const sum = array.reduce((acc, val) => acc + val, 0);
   return sum / array.length;
 }
 
-function variance(array) {
+function standardDeviation(array) {
   const arrayMean = mean(array);
-  return array.reduce((acc, val) => acc + Math.pow(val - arrayMean, 2), 0);
+  const squaredDiffs = array.map(val => (val - arrayMean) ** 2);
+  const meanSquaredDiff = mean(squaredDiffs);
+  return Math.sqrt(meanSquaredDiff);
 }
 
-function covariance(array1, array2) {
-  const mean1 = mean(array1);
-  const mean2 = mean(array2);
-  return array1.reduce((acc, val, i) => acc + (val - mean1) * (array2[i] - mean2), 0);
+function normalize(array) {
+  const arrayMean = mean(array);
+  const arrayStdDev = standardDeviation(array);
+  return array.map(val => (val - arrayMean) / arrayStdDev);
 }
 
-function linearRegression(X, Y) {
-  const b1 = covariance(X, Y) / variance(X); // Slope
-  const b0 = mean(Y) - b1 * mean(X); // Intercept
+function gradientDescent(X, Y, learningRate = 0.05, tolerance = 0.001) {
+  let b0 = mean(Y);
+  let b1 = 0;
+  const n = X.length;
+  let prevMSE = Infinity;
+
+  for (let i = 0; i < 1000; i++) {
+    writeLog(`- [Coeficientes] atuais: b0 = ${b0}, b1 = ${b1}`);
+    let db0 = 0;
+    let db1 = 0;
+    let mse = 0;
+
+    for (let j = 0; j < n; j++) {
+      const error = Y[j] - (b0 + b1 * X[j]);
+      db0 += error;
+      db1 += error * X[j];
+      mse += error ** 2;
+    }
+
+    mse /= n; // Erro Quadrático Médio (MSE)
+
+    if (Math.abs(mse - prevMSE) < tolerance) {
+      writeLog(`- [Convergiu] após ${i} iterações com MSE = ${mse}`);
+      break;
+    }
+
+    prevMSE = mse;
+
+    db0 /= n;
+    db1 /= n;
+
+    b0 += learningRate * db0;
+    b1 += learningRate * db1;
+  }
+  
+  writeLog(`- [Coeficientes] finais: b0 = ${b0}, b1 = ${b1}`);
   return { b0, b1 };
 }
 
@@ -27,7 +63,14 @@ function predict(x, b0, b1) {
   return b0 + b1 * x;
 }
 
-const { b0, b1 } = linearRegression(X, Y);
+const XMean = mean(X);
+const XStdDev = standardDeviation(X);
+const normalizedX = normalize(X);
+
+const { b0: normalizedB0, b1: normalizedB1 } = gradientDescent(normalizedX, Y);
+
+b1 = normalizedB1 / XStdDev;
+b0 = normalizedB0 - b1 * XMean;
 
 const ctx = document.getElementById('regLinear').getContext('2d');
 
@@ -38,6 +81,7 @@ const minX = Math.min(...X);
 const maxX = Math.max(...X);
 
 const regressionLine = [];
+
 for (let x = minX - 1; x <= maxX + 1; x += 0.1) {
   regressionLine.push({ x: x, y: predict(x, b0, b1) });
 }
@@ -98,9 +142,8 @@ const regLinear = new Chart(ctx, config);
 function predictValue() {
   const px = parseFloat(document.getElementById('predict-x').value);
   if (px) {
-    const { b0, b1 } = linearRegression(X, Y);
-    const y = predict(px, b0, b1);
-    document.getElementById('previsao').innerHTML = "Previsão para X = " + px + ":<br><b class='text-success'>Y = " + y + "</b><hr>b0: " + b0 + "<br>b1: " + b1;
+    const y = predict(px, b0, b1); // Usando os valores globais de b0 e b1
+    document.getElementById('previsao').innerHTML = "Previsão para X = " + px + ":<br><b class='text-success'>Y = " + y + "</b>";
   }
 }
 
@@ -122,7 +165,13 @@ function updateChart() {
   X = newX;
   Y = newY;
 
-  const { b0, b1 } = linearRegression(X, Y);
+  const XMean = mean(X);
+  const XStdDev = standardDeviation(X);
+  const normalizedX = normalize(X);
+  
+  const { b0: normalizedB0, b1: normalizedB1 } = gradientDescent(normalizedX, Y);
+  b1 = normalizedB1 / XStdDev; // Desnormalizando b1
+  b0 = normalizedB0 - b1 * XMean; // Desnormalizando b0
 
   console.log("b0: " + b0);
   console.log("b1: " + b1);
@@ -170,7 +219,13 @@ function zoomOut() {
 }
 
 function updateChartWithZoom() {
-  const { b0, b1 } = linearRegression(X, Y);
+  const XMean = mean(X);
+  const XStdDev = standardDeviation(X);
+  const normalizedX = normalize(X);
+  
+  const { b0: normalizedB0, b1: normalizedB1 } = gradientDescent(normalizedX, Y);
+  b1 = normalizedB1 / XStdDev; // Desnormalizando b1
+  b0 = normalizedB0 - b1 * XMean; // Desnormalizando b0
 
   const minX = Math.min(...X);
   const maxX = Math.max(...X);
@@ -181,17 +236,21 @@ function updateChartWithZoom() {
   const scaledMaxX = maxX + (maxX - minX) * zoomX / 200;
   const scaledMinY = minY - (maxY - minY) * zoomY / 200;
   const scaledMaxY = maxY + (maxY - minY) * zoomY / 200;
-
+  
   const regressionLine = [];
   for (let x = scaledMinX; x <= scaledMaxX; x += 0.1) {
-    regressionLine.push({ x: x, y: predict(x, b0, b1) });
+  regressionLine.push({ x: x, y: predict(x, b0, b1) });
   }
-
+  
   regLinear.options.scales.x.min = scaledMinX;
   regLinear.options.scales.x.max = scaledMaxX;
   regLinear.options.scales.y.min = scaledMinY;
   regLinear.options.scales.y.max = scaledMaxY;
-
+  
   regLinear.data.datasets[1].data = regressionLine;
   regLinear.update();
-}
+  }
+  
+  function writeLog(text) {
+  document.getElementById('logs').innerHTML += text + "\n";
+  }
