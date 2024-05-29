@@ -74,9 +74,6 @@ b0 = normalizedB0 - b1 * XMean;
 
 const ctx = document.getElementById('regLinear').getContext('2d');
 
-console.log("b0: " + b0);
-console.log("b1: " + b1);
-
 const minX = Math.min(...X);
 const maxX = Math.max(...X);
 
@@ -172,9 +169,6 @@ function updateChart() {
   const { b0: normalizedB0, b1: normalizedB1 } = gradientDescent(normalizedX, Y);
   b1 = normalizedB1 / XStdDev; // Desnormalizando b1
   b0 = normalizedB0 - b1 * XMean; // Desnormalizando b0
-
-  console.log("b0: " + b0);
-  console.log("b1: " + b1);
 
   const minX = Math.min(...X);
   const maxX = Math.max(...X);

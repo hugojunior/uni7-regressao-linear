@@ -121,9 +121,6 @@ function updateChart() {
 
   const { b0, b1 } = linearRegression(X, Y);
 
-  console.log("b0: " + b0);
-  console.log("b1: " + b1);
-
   const minX = Math.min(...X);
   const maxX = Math.max(...X);
 
