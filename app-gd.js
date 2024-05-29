@@ -43,7 +43,7 @@ function gradientDescent(X, Y) {
   let prevMSE = Infinity;
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {
-    writeLog(`- [Coeficientes] atuais: b0 = ${b0}, b1 = ${b1}`);
+    writeLog(`- [Coeficientes] Atuais: b0 = ${b0}, b1 = ${b1}`);
     let db0 = 0;
     let db1 = 0;
     let mse = 0;
@@ -58,9 +58,10 @@ function gradientDescent(X, Y) {
     mse /= n; // Erro Quadrático Médio (MSE)
 
     if (Math.abs(mse - prevMSE) < CONVERGENCE_TOLERANCE) {
-      writeLog(`- [Convergiu] após ${i} iterações com MSE = ${mse}`);
+      writeLog(`+ [Convergência] Atingida após ${i} iterações com MSE = ${mse}`);
       break;
     }
+    writeLog(`- [Convergência] Não atingida após ${i} iterações com MSE = ${mse}`);
 
     prevMSE = mse;
 
@@ -71,7 +72,7 @@ function gradientDescent(X, Y) {
     b1 += LEARNING_RATE * db1;
   }
 
-  writeLog(`- [Coeficientes] finais: b0 = ${b0}, b1 = ${b1}`);
+  writeLog(`+ [Coeficientes] Finais: b0 = ${b0}, b1 = ${b1}`);
   return { b0, b1 };
 }
 
